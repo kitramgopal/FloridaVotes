@@ -607,6 +607,6 @@ def writeSheet(spreadsheet):
         worksheet.write_number(row, col+ 96, U65WInd)
         worksheet.write_number(row, col+ 97, O65WInd)
         worksheet.write_number(row, col+ 98, OtherAge)
-        worksheet.write_number(row, col +99 prExempt)
+        worksheet.write_number(row, col +99, prExempt)
         row += 1
     workbook.close()
