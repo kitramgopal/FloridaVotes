@@ -3,18 +3,15 @@ from datetime import date
 from dateutil import parser
 import xlsxwriter
 counties = ['ALA', 'BAK', 'BAY', 'BRA', 'BRE', 'BRO', 'CAL', 'CHA', 'CIT', 'CLA', 'CLL', 'CLM', 'DAD','DES', 'DIX', 'DUV', 'ESC', 'FLA', 'FRA', 'GAD', 'GIL', 'GLA', 'GUL','HAM', 'HAR', 'HEN', 'HER', 'HIG', 'HIL', 'HOL', 'IND', 'JAC', 'JEF', 'LAF','LAK', 'LEE', 'LEO', 'LEV', 'LIB', 'MAD','MAN', 'MON', 'MRN', 'MRT', 'NAS', 'OKA', 'OKE', 'ORA', 'OSC', 'PAL', 'PAS', 'PIN', 'POL', 'PUT', 'SAN', 'SAR', 'SEM', 'STJ', 'STL', 'SUM', 'SUW', 'TAY', 'UNI', 'VOL', 'WAK', 'WAL', 'WAS']
+DATE = '20141208' #ADJUSTABLE
 
 #if VH/VR files are in downloadable form
-#STEP 1) download Voter History and Voter Registration files for same year  
-#STEP 2) adjust file names in readVRTxtFile() and readVHFile() for the relevant year
-#STEP 3) Select for desired election in selectElection()
-#STEP 4) Adjust election date in calcAGE()
-#STEP 5) Change Excel sheet output name
+#STEP 1) download Voter History and Voter Registration files for same year-- takes a TON of space, perhaps use instabase  
+#STEP 2) Select for desired election in selectElection()
+#STEP 3) Change Excel sheet output name
 
-#If VR/HR files are in HTML form
-#STEP 1) switch scrapeVHURL() for readVHFile() in the createVoterIDString() function and scrapeVRURL() for readVRTxtFile() in the registeredVoters() function
-#STEP 2) Adjust URL names in scrapeVHURL() and scrapeVRURL() to reflect correct dates 
-#STEPS 3,4 and 5 repeat from above
+#STEP 4 (IF NEEDED) If VR/HR files are in HTML form
+#switch scrapeVHURL() for readVHFile() in the createVoterIDString() function and scrapeVRURL() for readVRTxtFile() in the registeredVoters() function
 
 def run():
     listofCountLists = createFullCountyList()
@@ -31,7 +28,7 @@ def createFullCountyList():
     return spreadsheet
 
 def readVRTxtFile(y):
-    x = y + '_20141208.txt' #ADJUST for file name
+    x = y + '_' + DATE + '.txt'
     with open(x) as file:
         data =file.read()
         rowList = data.split('\n')
@@ -55,7 +52,7 @@ def combineLists2(votedIDList , registeredVoterDict):
 
 
 def readVHFile(y): #interchangeable with scrapeURL
-    x = y + '_H_20141208.txt' #ADJUST for file name
+    x = y + '_H_' + DATE + '.txt'
     with open(x) as file:
         data =file.read()
         splitLines = data.split('\n')
@@ -82,7 +79,10 @@ def calcAge(bday):
     if bday == '':
         return 0
     bd = parser.parse(bday).date()
-    today = date(2014,11,4) #ADJUST for whatever the election date is  
+    y = int(DATE[:4])
+    m = int(DATE[4:6])
+    d = int(DATE[6:])
+    today =  date(y,m,d)
     y = today.year - bd.year
     if today.month < bd.month or today.month == bd.month and today.day < bd.day:
         y -= 1
@@ -213,6 +213,7 @@ def createDemoSummary(i):
     U65WInd = 0 
     O65WInd = 0
     OtherAge = 0
+    prExempt = 0
     for vars in i: #iterates through rows
         Hispanic = False
         Black = False 
@@ -229,6 +230,8 @@ def createDemoSummary(i):
         else:
             countyName = vars[0]
             x = calcAge(vars[21]) #age calculate
+             if vars[6] == 'Y':
+                prExempt +=1
             if x >=18 and x <= 29: # age sort
                 aU30 += 1
                 U30 = True
@@ -449,7 +452,7 @@ def createDemoSummary(i):
                     else:
                         if O65 == True:
                             O65WInd +=1
-    rowSum = [countyName, totalRegistered, aU30, aU40, aU50, aU65, aO65, B3, H4, W5, RaceOth, Dem, Rep, Ind,BlackDem, HisDem, WhiDem, BlackRep, HisRep, WhiRep, BlackInd, HisInd, WhiInd, U30Black, U40Black, U50Black, U65Black, O65Black, U30White, U40White, U50White, U65White, O65White, U30His,U40His, U50His, U65His, O65His, U30Dem, U40Dem, U50Dem, U65Dem, O65Dem, U30Rep, U40Rep, U50Rep, U65Rep, O65Rep, U30Ind, U40Ind, U50Ind, U65Ind, O65Ind, U30BDem, U40BDem, U50BDem, U65BDem, O65BDem, U30BRep, U40BRep, U50BRep, U65BRep, O65BRep, U30BInd, U40BInd, U50BInd, U65BInd, O65BInd, U30HDem,U40HDem, U50HDem, U65HDem, O65HDem, U30HRep, U40HRep, U50HRep, U65HRep, O65HRep, U30HInd, U40HInd, U50HInd, U65HInd, O65HInd, U30WDem, U40WDem, U50WDem, U65WDem, O65WDem, U30WRep, U40WRep, U50WRep, U65WRep, O65WRep, U30WInd, U40WInd, U50WInd, U65WInd, O65WInd, OtherAge]
+    rowSum = [countyName, totalRegistered, aU30, aU40, aU50, aU65, aO65, B3, H4, W5, RaceOth, Dem, Rep, Ind,BlackDem, HisDem, WhiDem, BlackRep, HisRep, WhiRep, BlackInd, HisInd, WhiInd, U30Black, U40Black, U50Black, U65Black, O65Black, U30White, U40White, U50White, U65White, O65White, U30His,U40His, U50His, U65His, O65His, U30Dem, U40Dem, U50Dem, U65Dem, O65Dem, U30Rep, U40Rep, U50Rep, U65Rep, O65Rep, U30Ind, U40Ind, U50Ind, U65Ind, O65Ind, U30BDem, U40BDem, U50BDem, U65BDem, O65BDem, U30BRep, U40BRep, U50BRep, U65BRep, O65BRep, U30BInd, U40BInd, U50BInd, U65BInd, O65BInd, U30HDem,U40HDem, U50HDem, U65HDem, O65HDem, U30HRep, U40HRep, U50HRep, U65HRep, O65HRep, U30HInd, U40HInd, U50HInd, U65HInd, O65HInd, U30WDem, U40WDem, U50WDem, U65WDem, O65WDem, U30WRep, U40WRep, U50WRep, U65WRep, O65WRep, U30WInd, U40WInd, U50WInd, U65WInd, O65WInd, OtherAge, prExempt]
     return rowSum 
 
 def writeSheet(spreadsheet):
@@ -556,9 +559,10 @@ def writeSheet(spreadsheet):
     worksheet.write('CT1', 'White Independent, 50-59', bold)
     worksheet.write('CU1', 'White Independent, 65+', bold)
     worksheet.write('CV1', 'Other Age Gap', bold)
+    worksheet.write('CW1', 'Public Records Exempt', bold)
     row = 1
     col = 1
-    for countyName, totalRegistered, aU30, aU40, aU50, aU65, aO65, B3, H4, W5, RaceOth, Dem, Rep, Ind,BlackDem, HisDem, WhiDem, BlackRep, HisRep, WhiRep, BlackInd, HisInd, WhiInd, U30Black, U40Black, U50Black, U65Black, O65Black, U30White, U40White, U50White, U65White, O65White, U30His,U40His, U50His, U65His, O65His, U30Dem, U40Dem, U50Dem, U65Dem, O65Dem, U30Rep, U40Rep, U50Rep, U65Rep, O65Rep, U30Ind, U40Ind, U50Ind, U65Ind, O65Ind, U30BDem, U40BDem, U50BDem, U65BDem, O65BDem, U30BRep, U40BRep, U50BRep, U65BRep, O65BRep, U30BInd, U40BInd, U50BInd, U65BInd, O65BInd, U30HDem,U40HDem, U50HDem, U65HDem, O65HDem, U30HRep, U40HRep, U50HRep, U65HRep, O65HRep, U30HInd, U40HInd, U50HInd, U65HInd, O65HInd, U30WDem, U40WDem, U50WDem, U65WDem, O65WDem, U30WRep, U40WRep, U50WRep, U65WRep, O65WRep, U30WInd, U40WInd, U50WInd, U65WInd, O65WInd, OtherAge in spreadsheet:
+    for countyName, totalRegistered, aU30, aU40, aU50, aU65, aO65, B3, H4, W5, RaceOth, Dem, Rep, Ind,BlackDem, HisDem, WhiDem, BlackRep, HisRep, WhiRep, BlackInd, HisInd, WhiInd, U30Black, U40Black, U50Black, U65Black, O65Black, U30White, U40White, U50White, U65White, O65White, U30His,U40His, U50His, U65His, O65His, U30Dem, U40Dem, U50Dem, U65Dem, O65Dem, U30Rep, U40Rep, U50Rep, U65Rep, O65Rep, U30Ind, U40Ind, U50Ind, U65Ind, O65Ind, U30BDem, U40BDem, U50BDem, U65BDem, O65BDem, U30BRep, U40BRep, U50BRep, U65BRep, O65BRep, U30BInd, U40BInd, U50BInd, U65BInd, O65BInd, U30HDem,U40HDem, U50HDem, U65HDem, O65HDem, U30HRep, U40HRep, U50HRep, U65HRep, O65HRep, U30HInd, U40HInd, U50HInd, U65HInd, O65HInd, U30WDem, U40WDem, U50WDem, U65WDem, O65WDem, U30WRep, U40WRep, U50WRep, U65WRep, O65WRep, U30WInd, U40WInd, U50WInd, U65WInd, O65WInd, OtherAge, prExempt in spreadsheet:
         worksheet.write_string  (row, col, countyName)
         worksheet.write_number (row, col +1, totalRegistered)
         worksheet.write_number(row, col+ 2, aU30)
@@ -658,12 +662,13 @@ def writeSheet(spreadsheet):
         worksheet.write_number(row, col+ 96, U65WInd)
         worksheet.write_number(row, col+ 97, O65WInd)
         worksheet.write_number(row, col+ 98, OtherAge)
+        worksheet.write_number(row,col+99, prExempt
         row += 1
     workbook.close()
 
 
 def scrapeVRURL(county): #interchangeable with readFile
-    url = 'http://flvoters.com/download/20170131/'+ county + '_H_20170207.txt'#exampleURL--> do not plug in
+    url = 'http://flvoters.com/download/' + DATE + '/'+ county + '_H_' + DATE + '.txt'#exampleURL--> do not plug in
     html = requests.get(url).text 
     splitLines = html.split('\n')
     listOfLists = []
@@ -676,7 +681,7 @@ def scrapeVRURL(county): #interchangeable with readFile
     return listOfLists
 
 def scrapeVHURL(county): #interchangeable with readFile
-    url = 'http://flvoters.com/download/20170131/'+ county + '_20170207.txt'#exampleURL--> do not plug in
+    url = 'http://flvoters.com/download/'+ DATE + '/'+ county + '_' + DATE + '.txt'#exampleURL--> do not plug in
     html = requests.get(url).text 
     splitLines = html.split('\n')
     return splitLines
