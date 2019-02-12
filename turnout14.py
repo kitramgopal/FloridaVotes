@@ -230,7 +230,7 @@ def createDemoSummary(i):
         else:
             countyName = vars[0]
             x = calcAge(vars[21]) #age calculate
-             if vars[6] == 'Y':
+            if vars[6] == 'Y':
                 prExempt +=1
             if x >=18 and x <= 29: # age sort
                 aU30 += 1
