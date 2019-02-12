@@ -662,28 +662,28 @@ def writeSheet(spreadsheet):
         worksheet.write_number(row, col+ 96, U65WInd)
         worksheet.write_number(row, col+ 97, O65WInd)
         worksheet.write_number(row, col+ 98, OtherAge)
-        worksheet.write_number(row,col+99, prExempt
+        worksheet.write_number(row,col+99, prExempt)
         row += 1
     workbook.close()
 
+   
+#FOR URL SCRAPING- adjust, neeeds work
+#def scrapeVRURL(county): #interchangeable with readFile
+#    url = 'http://flvoters.com/download/' + DATE + '/'+ county + '_H_' + DATE + '.txt'#exampleURL--> do not plug in
+#    html = requests.get(url).text 
+#    splitLines = html.split('\n')
+#    listOfLists = []
+#        for row in splitLines:
+#            vars = row.split('\t') 
+#            if len(vars) != 38: 
+#                rowList.remove(row)
+#            else:
+#                listOfLists.append(vars)
+#    return listOfLists
 
-def scrapeVRURL(county): #interchangeable with readFile
-    url = 'http://flvoters.com/download/' + DATE + '/'+ county + '_H_' + DATE + '.txt'#exampleURL--> do not plug in
-    html = requests.get(url).text 
-    splitLines = html.split('\n')
-    listOfLists = []
-        for row in splitLines:
-            vars = row.split('\t') 
-            if len(vars) != 38: 
-                rowList.remove(row)
-            else:
-                listOfLists.append(vars)
-    return listOfLists
+#def scrapeVHURL(county): #interchangeable with readFile
+#    url = 'http://flvoters.com/download/'+ DATE + '/'+ county + '_' + DATE + '.txt'#exampleURL--> do not plug in
+#    html = requests.get(url).text 
+#    splitLines = html.split('\n')
+ #   return splitLines
 
-def scrapeVHURL(county): #interchangeable with readFile
-    url = 'http://flvoters.com/download/'+ DATE + '/'+ county + '_' + DATE + '.txt'#exampleURL--> do not plug in
-    html = requests.get(url).text 
-    splitLines = html.split('\n')
-    return splitLines
-
-run()
