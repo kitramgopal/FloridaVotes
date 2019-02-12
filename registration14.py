@@ -3,7 +3,8 @@ from datetime import date
 from dateutil import parser
 import xlsxwriter
 counties = ['ALA', 'BAK', 'BAY', 'BRA', 'BRE', 'BRO', 'CAL', 'CHA', 'CIT', 'CLA', 'CLL', 'CLM', 'DAD','DES', 'DIX', 'DUV', 'ESC', 'FLA', 'FRA', 'GAD', 'GIL', 'GLA', 'GUL','HAM', 'HAR', 'HEN', 'HER', 'HIG', 'HIL', 'HOL', 'IND', 'JAC', 'JEF', 'LAF','LAK', 'LEE', 'LEO', 'LEV', 'LIB', 'MAD','MAN', 'MON', 'MRN', 'MRT', 'NAS', 'OKA', 'OKE', 'ORA', 'OSC', 'PAL', 'PAS', 'PIN', 'POL', 'PUT', 'SAN', 'SAR', 'SEM', 'STJ', 'STL', 'SUM', 'SUW', 'TAY', 'UNI', 'VOL', 'WAK', 'WAL', 'WAS']
-#To adjust for other years, 1)change name of download URL or text file base and make sure createspreadsheetData() references correct one, 2) calcAge data for "today", 3) spreadsheet name
+DATE = '20141208'
+#To adjust for other years, 1) change 'DATE' variable, 2) adjust method call for URL or text file format and make sure createspreadsheetData() references correct one... 3) change spreadsheet name
 
 def run():
     data = createSpreadSheetData()
@@ -18,7 +19,7 @@ def createSpreadSheetData():
     return spreadsheet
 
 def readTxtFile(y):
-    x = y + '_20141208.txt'
+    x = y + '_' + DATE + '.txt'
     with open(x) as file:
         data =file.read()
         rowList = data.split('\n')
@@ -31,8 +32,8 @@ def readTxtFile(y):
                 listOfLists.append(vars)
     return listOfLists
 
-def scrapeRegistrationURL(county):
-    url= 'http://flvoters.com/download/20161031/20161101_VoterDetail/' + county + '_20161101.txt'
+def scrapeRegistrationURL(county): #to use for years  where files are not downloadable
+    url= 'http://flvoters.com/download/20161031/20161101_VoterDetail/' + county + '_' + DATE + '.txt'
     html = requests.get(url).text 
     rowList = html.split('\n')
     listOfLists = []
@@ -43,12 +44,15 @@ def scrapeRegistrationURL(county):
         else:
             listOfLists.append(vars)
     return listOfLists
-        
+
 def calcAge(bday):
     if bday == '':
         return 0
     bd = parser.parse(bday).date()
-    today = date(2014,10,31)
+    y = int(DATE[:4])
+    m = int(DATE[4:6])
+    d = int(DATE[6:])
+    today = date(y,m,d)
     y = today.year - bd.year
     if today.month < bd.month or today.month == bd.month and today.day < bd.day:
         y -= 1
@@ -154,6 +158,7 @@ def createDemoSummary(i):
     U65WInd = 0 
     O65WInd = 0
     OtherAge = 0
+    prExempt = 0 #public records exemption
     for vars in i: #iterates through rows
         Hispanic = False
         Black = False 
@@ -169,6 +174,8 @@ def createDemoSummary(i):
             return len(vars) #eiher will give number or URL
         else:
             countyName = vars[0]
+            if vars[6] == 'Y':
+                prExempt +=1
             x = calcAge(vars[21]) #age calculate
             if x >=18 and x <= 29: # age sort
                 aU30 += 1
@@ -390,7 +397,7 @@ def createDemoSummary(i):
                     else:
                         if O65 == True:
                             O65WInd +=1
-    rowSum = [countyName, totalRegistered, aU30, aU40, aU50, aU65, aO65, B3, H4, W5, RaceOth, Dem, Rep, Ind,BlackDem, HisDem, WhiDem, BlackRep, HisRep, WhiRep, BlackInd, HisInd, WhiInd, U30Black, U40Black, U50Black, U65Black, O65Black, U30White, U40White, U50White, U65White, O65White, U30His,U40His, U50His, U65His, O65His, U30Dem, U40Dem, U50Dem, U65Dem, O65Dem, U30Rep, U40Rep, U50Rep, U65Rep, O65Rep, U30Ind, U40Ind, U50Ind, U65Ind, O65Ind, U30BDem, U40BDem, U50BDem, U65BDem, O65BDem, U30BRep, U40BRep, U50BRep, U65BRep, O65BRep, U30BInd, U40BInd, U50BInd, U65BInd, O65BInd, U30HDem,U40HDem, U50HDem, U65HDem, O65HDem, U30HRep, U40HRep, U50HRep, U65HRep, O65HRep, U30HInd, U40HInd, U50HInd, U65HInd, O65HInd, U30WDem, U40WDem, U50WDem, U65WDem, O65WDem, U30WRep, U40WRep, U50WRep, U65WRep, O65WRep, U30WInd, U40WInd, U50WInd, U65WInd, O65WInd, OtherAge]
+    rowSum = [countyName, totalRegistered, aU30, aU40, aU50, aU65, aO65, B3, H4, W5, RaceOth, Dem, Rep, Ind,BlackDem, HisDem, WhiDem, BlackRep, HisRep, WhiRep, BlackInd, HisInd, WhiInd, U30Black, U40Black, U50Black, U65Black, O65Black, U30White, U40White, U50White, U65White, O65White, U30His,U40His, U50His, U65His, O65His, U30Dem, U40Dem, U50Dem, U65Dem, O65Dem, U30Rep, U40Rep, U50Rep, U65Rep, O65Rep, U30Ind, U40Ind, U50Ind, U65Ind, O65Ind, U30BDem, U40BDem, U50BDem, U65BDem, O65BDem, U30BRep, U40BRep, U50BRep, U65BRep, O65BRep, U30BInd, U40BInd, U50BInd, U65BInd, O65BInd, U30HDem,U40HDem, U50HDem, U65HDem, O65HDem, U30HRep, U40HRep, U50HRep, U65HRep, O65HRep, U30HInd, U40HInd, U50HInd, U65HInd, O65HInd, U30WDem, U40WDem, U50WDem, U65WDem, O65WDem, U30WRep, U40WRep, U50WRep, U65WRep, O65WRep, U30WInd, U40WInd, U50WInd, U65WInd, O65WInd, OtherAge, prExempt]
     return rowSum 
 
 def writeSheet(spreadsheet):
@@ -497,9 +504,10 @@ def writeSheet(spreadsheet):
     worksheet.write('CT1', 'White Independent, 50-59', bold)
     worksheet.write('CU1', 'White Independent, 65+', bold)
     worksheet.write('CV1', 'Other Age Gap', bold)
+    worksheet.write('CW1', 'Public Records Exemption',bold)
     row = 1
     col = 1
-    for countyName, totalRegistered, aU30, aU40, aU50, aU65, aO65, B3, H4, W5, RaceOth, Dem, Rep, Ind,BlackDem, HisDem, WhiDem, BlackRep, HisRep, WhiRep, BlackInd, HisInd, WhiInd, U30Black, U40Black, U50Black, U65Black, O65Black, U30White, U40White, U50White, U65White, O65White, U30His,U40His, U50His, U65His, O65His, U30Dem, U40Dem, U50Dem, U65Dem, O65Dem, U30Rep, U40Rep, U50Rep, U65Rep, O65Rep, U30Ind, U40Ind, U50Ind, U65Ind, O65Ind, U30BDem, U40BDem, U50BDem, U65BDem, O65BDem, U30BRep, U40BRep, U50BRep, U65BRep, O65BRep, U30BInd, U40BInd, U50BInd, U65BInd, O65BInd, U30HDem,U40HDem, U50HDem, U65HDem, O65HDem, U30HRep, U40HRep, U50HRep, U65HRep, O65HRep, U30HInd, U40HInd, U50HInd, U65HInd, O65HInd, U30WDem, U40WDem, U50WDem, U65WDem, O65WDem, U30WRep, U40WRep, U50WRep, U65WRep, O65WRep, U30WInd, U40WInd, U50WInd, U65WInd, O65WInd, OtherAge in spreadsheet:
+    for countyName, totalRegistered, aU30, aU40, aU50, aU65, aO65, B3, H4, W5, RaceOth, Dem, Rep, Ind,BlackDem, HisDem, WhiDem, BlackRep, HisRep, WhiRep, BlackInd, HisInd, WhiInd, U30Black, U40Black, U50Black, U65Black, O65Black, U30White, U40White, U50White, U65White, O65White, U30His,U40His, U50His, U65His, O65His, U30Dem, U40Dem, U50Dem, U65Dem, O65Dem, U30Rep, U40Rep, U50Rep, U65Rep, O65Rep, U30Ind, U40Ind, U50Ind, U65Ind, O65Ind, U30BDem, U40BDem, U50BDem, U65BDem, O65BDem, U30BRep, U40BRep, U50BRep, U65BRep, O65BRep, U30BInd, U40BInd, U50BInd, U65BInd, O65BInd, U30HDem,U40HDem, U50HDem, U65HDem, O65HDem, U30HRep, U40HRep, U50HRep, U65HRep, O65HRep, U30HInd, U40HInd, U50HInd, U65HInd, O65HInd, U30WDem, U40WDem, U50WDem, U65WDem, O65WDem, U30WRep, U40WRep, U50WRep, U65WRep, O65WRep, U30WInd, U40WInd, U50WInd, U65WInd, O65WInd, OtherAge, prExempt in spreadsheet:
         worksheet.write_string  (row, col, countyName)
         worksheet.write_number (row, col +1, totalRegistered)
         worksheet.write_number(row, col+ 2, aU30)
@@ -599,5 +607,6 @@ def writeSheet(spreadsheet):
         worksheet.write_number(row, col+ 96, U65WInd)
         worksheet.write_number(row, col+ 97, O65WInd)
         worksheet.write_number(row, col+ 98, OtherAge)
+        worksheet.write_number(row, col +99 prExempt)
         row += 1
     workbook.close()
